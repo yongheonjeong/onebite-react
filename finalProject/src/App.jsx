@@ -1,53 +1,120 @@
-import React from 'react' 
+import React from 'react'
+import { useReducer,useRef,createContext } from 'react' 
 import './App.css'
+
 import Home from "./pages/Home"
 import Diary from "./pages/Diary"
 import New from "./pages/New"
 import Notfound from "./pages/Notfound"
+import Edit from "./pages/Edit"
+
 import {Route,Routes, Link,useNavigate} from "react-router-dom"
 import {getEmotionImage} from "./util/get-emotion-image"
+
 import Button from "./components/Button" 
 import Header from "./components/Header"
 
+const mockData = [
+  {
+    id: 1,
+    createdDate: new Date().getTime(),
+    emotionId: 1,
+    content: "1번 일기 내용",
+  },
+  {
+    id: 2,
+    createdDate: new Date().getTime(),
+    emotionId: 2,
+    content: "2번 일기 내용",
+  },
+
+];
+
+
+function reducer(state,action){
+  switch(action.type){
+    case "CREATE" : 
+      return [action.data,...state];
+    case "UPDATE":
+      return state.map((item)=> (item.id) == action.data.id ? action.data : item);
+    case "DELETE":
+      return state.filter((item)=> item.id != action.id);
+    default: return state;
+  }
+}
+
+const DiaryStateContext = createContext();
+const DiaryDispatchContext = createContext();
+
 function App() { 
 
+  const IdRef = useRef(3);
+  const [data,dispatch] = useReducer(reducer,mockData);
+
+  // 새로운 일기 추가
+  const onCreate = (createdDate,emotionId,content) => {
+    //새로운 일기를 추가하는 기능
+    dispatch({
+      type:"CREATE",
+      data: {
+        id: IdRef.current++,
+        createdDate,
+        emotionId,
+        content,
+      }
+    });
+  };
+
+  // 기존 일기 수정
+
+  const onUpdate = (id,createdDate,emotionId,content) => {
+      dispatch(
+        {
+          type:"UPDATE",
+          data:{
+            id,
+            createdDate,
+            emotionId,
+            content,
+          }
+        }
+      );
+  };
+
+
+  // 기존 일기 삭제
   
+  const onDelete = (id) => {
+    dispatch({
+      type:"DELETE",
+      id,
+      }
+    );
+  };
+
   return (
+
     <>
-    <Header title={"Header"} 
-    leftChild={ <Button text={"Left"}/>}
-    rightChild={<Button text={"Right"}/>}
-    />
-    <Button
-     text={123}
-     type={"POSITIVE"}
-     onClick={()=>{
-      alert('123번 버튼 클릭@');
-    }}
-    />
-
-    <Button
-     text={123}
-     onClick={()=>{
-      alert('123번 버튼 클릭@');
-    }}
-    />
+    <button  onClick={()=>{
+      onCreate(new Date().getTime(),1,'hi');
+    }}>일기 추가 테스트</button>
 
 
-<Button
-     text={123}
-     type={"NEGATIVE"}
-     onClick={()=>{
-      alert('123번 버튼 클릭@');
-    }}
-    />
-     
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={{
+        onCreate,
+        onDelete,
+        onUpdate
+      }}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/new" element={<New />} />
+        <Route path="/edit/:id" element={<Edit />} />
         <Route path="/diary/:id" element={<Diary />} />
         <Route path="*" element={<Notfound />} />
       </Routes>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
     </>
   )
 }
