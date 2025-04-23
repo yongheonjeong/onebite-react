@@ -94,11 +94,7 @@ function App() {
 
   return (
 
-    <>
-    <button  onClick={()=>{
-      onCreate(new Date().getTime(),1,'hi');
-    }}>일기 추가 테스트</button>
-
+   <>
 
     <DiaryStateContext.Provider value={data}>
       <DiaryDispatchContext.Provider value={{
