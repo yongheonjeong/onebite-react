@@ -1,8 +1,14 @@
-import React from 'react'
-import "./Button.css"
+import "./Button.css";
 
-const Button = ({text, type,onClick}) => {
-    return <button className={`Button Button_${type}`} onClick={onClick}>{text}</button>
+const Button = ({ text, type, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`Button Button_${type}`}
+    >
+      {text}
+    </button>
+  );
 };
 
 export default Button;
